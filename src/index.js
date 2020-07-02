@@ -6,10 +6,12 @@ const session = require('express-session');
 const {allowInsecurePrototypeAccess} = require('@handlebars/allow-prototype-access');
 const Handlebars = require('handlebars');
 const flash = require('connect-flash');
+const passport = require('passport');
 
 // Initializations
 const app = express();
 require('./database');
+require('./config/passport');
 
 // Settings
 app.set('port', process.env.PORT || 4000);
@@ -31,13 +33,15 @@ app.use(session({
     resave: true,
     saveUninitialized: true
 }));
+app.use(passport.initialize());
+app.use(passport.session());
 app.use(flash());
 
 // Gobal Variables
 app.use((req, res, next) =>{
     res.locals.success_msg = req.flash('success_msg');
     res.locals.error_msg = req.flash('error_msg');
-
+    res.locals.error = req.flash('error');
     next();
 });
 
@@ -52,4 +56,4 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Server is Listenning
 app.listen(app.get('port'), () => {
     console.log('Server on port', app.get('port'));
-} );
+});
